@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript">
+        var localeStr = opera.extension.bgProcess.localeStr;
+    
+        function processValue(value, template) { return value ? template.replace(/@/g, value) : '' }
+        
+        function showDay(weatherData) {
+            document.write(
+                '<tr><td>',
+                processValue(weatherData.iconUrl, '<img src="@"/>'),
+                '</td><td>',
+                processValue(weatherData.condition, '@<br/>', 'condition'),
+                processValue(weatherData.temperature, '@&deg;C<br/>'),
+                processValue(weatherData.wind, localeStr.popup.wind + ': @<br/>'),
+                processValue(weatherData.humidity, '<div class="humidityBar"><div class="humidity" style="width: @%">' + localeStr.popup.humidity + ': @%</div></div>'),
+                '</td></tr>'
+            );
+        }
+        
+        function showWeather() {
+            var weatherData = opera.extension.bgProcess.weatherData;
+            if(weatherData) {
+                showDay(weatherData);
+                var borderWidth = '3';
+                weatherData.forecast.forEach(function(forecastData){
+                    document.write('<tr><td colspan="2" style="border-top: ' + borderWidth + 'px solid black"></td></tr>');
+                    borderWidth = '1';
+                    showDay(forecastData);
+                });
+            } else {
+                document.write('<tr><td style="text-align: center"><img src="warning.png"/><br/>' + localeStr.popup.error + '.</td></tr>');
+            }
+        }
+    </script>
+    <style type="text/css">
+        #list { width: 100%; }
+        .humidityBar { width: 100%; border-radius: 5px; background-color: #04f; }
+        .humidity { border-radius: 5px; background-color: #0af; color: #fff; text-align: center; }
+    </style>
+</head>
+<body onload="opera.extension.bgProcess.button.popup.height = document.body.scrollHeight+20">
+    <table id="list">
+        <script type="text/javascript">showWeather();</script>
+    </table>
+</body>
+</html>

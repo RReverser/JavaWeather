@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget xmlns="http://www.w3.org/ns/widgets" id="extensions:JavaWeather" defaultlocale="en" version="1.0">
+    <name xml:lang="en">J-Weather</name>
+    <name xml:lang="ru">J-Погода</name>
+    <name xml:lang="uk">J-Погода</name>
+    <access origin="*"/>
+    <license href="http://www.apache.org/licenses/LICENSE-2.0">Copyright 2011 I&amp;K
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</license>
+    <author>I&amp;K</author>
+    <description xml:lang="en">Client extension for JavaWeather server</description>
+    <description xml:lang="ru">Расширение-клиент для сервера погоды JavaWeather</description>
+    <description xml:lang="uk">Розширення-клієнт для серверу погоди JavaWeather</description>
+    <preference name="server" value="http://localhost:7777/"/>
+    <preference name="provider" value="google"/>
+    <preference name="location" value="Kyyiv"/>
+</widget>

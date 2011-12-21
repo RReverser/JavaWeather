@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script type="text/javascript">
+        var localeStr = opera.extension.bgProcess.localeStr;
+    
+        var props = ['server', 'provider', 'location'],
+            gmaps = google.maps,
+            geocoder = new gmaps.Geocoder(),
+            map,
+            marker;
+    
+        Array.prototype.contains = function(value) { return this.indexOf(value) >= 0 }
+    
+        function setPosition(position, where) {
+            where = where || ['marker', 'center', 'geocode'];
+            if(where.contains('marker')) marker.setPosition(position);
+            if(where.contains('center')) map.setCenter(position);
+            if(where.contains('geocode')) {
+                geocoder.geocode({latLng: position, language: 'en'}, function(results, status) {
+                    console.log(results);
+                    if (status !== gmaps.GeocoderStatus.OK) return;
+                    var components = results[0].address_components;
+                    for(var i in components) {
+                        var component = components[i];
+                        if(component.types.contains('locality')) {
+                            marker.setTitle(val('location', component.long_name));
+                            break;
+                        }
+                    }
+                });
+            }
+        }
+        
+        function setPositionByAddr(address) {
+            geocoder.geocode({address: address}, function(results, status) {
+                if(status == gmaps.GeocoderStatus.OK) setPosition(results[0].geometry.location, ['marker', 'center']);
+                marker.setTitle(address);
+            });
+        }
+        
+        function $(id) { return document.getElementById(id) }
+    
+        function val(id, value, index) {
+            var obj = $(id);
+            if(obj) {
+                if(!index) index = 'value';
+                if(value !== undefined) obj[index] = value;
+                return obj[index];
+            } else {
+                return value;
+            }
+        }
+        
+        function text(id, value) { return val(id, value, 'innerText') }
+    
+        function locate() {
+            if(!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition(function(position) {
+                setPosition(new gmaps.LatLng(position.coords.latitude, position.coords.longitude));
+            });
+        }
+    
+        function load() {
+            document.title = text('name', widget.name);
+            for(var label in localeStr.options) text(label + 'Label', localeStr.options[label]);
+            props.forEach(function(prop) { val(prop, widget.preferences[prop]) });
+
+            var locImg = $('locationImg');
+            locImg.style.height = locImg.offsetWidth + 'px';
+            
+            map = new gmaps.Map(locImg, {
+                zoom: 8,
+                mapTypeId: gmaps.MapTypeId.ROADMAP,
+                mapTypeControlOptions: {style: gmaps.MapTypeControlStyle.DROPDOWN_MENU},
+                navigationControlOptions: {style: gmaps.NavigationControlStyle.SMALL}
+            });
+            gmaps.event.addListener(map, 'click', function(event) { setPosition(event.latLng, ['marker', 'geocode']) });
+            marker = new gmaps.Marker({map: map});
+            
+            setPositionByAddr('Kyyiv');
+            setPositionByAddr(val('location'));
+            
+            if(navigator.geolocation) { $('locationBtn').style.display = 'inline' }
+        }
+        
+        function save() {
+            props.forEach(function(prop) { widget.preferences[prop] = val(prop) });
+            setPositionByAddr(val('location'));
+            opera.extension.bgProcess.getWeather();
+            return false;
+        }
+    </script>
+    <style type="text/css">
+        table { text-align: left; }
+        td>* { width: 100%; }
+        body { background-image: -o-linear-gradient(left, rgb(218,237,226), rgb(160,162,184)); }
+        #locationImg { width: 100%; }
+        #locationImg>* { border-radius: 10px; }
+        #locationBtn { width: auto; font-size: 12px; vertical-align: top; display: none; }
+    </style>
+</head>
+<body onload="load()">
+    <center>
+        <img src="icon.png"/>
+        <h2 id="name"></h2>
+        <form onsubmit="return save()">
+            <table>
+                <tr><td id="serverLabel"></td><td><input type="url" id="server"/></td></tr>
+                <tr><td id="providerLabel"></td><td><select id="provider"><option value="google">Google</option><option value="yahoo">Yahoo!</option><option value="wunderground">WUnderground</option></select></td></tr>
+                <tr><td><span id="locationLabel"></span><button type="button" id="locationBtn" onclick="locate()">...</button></td><td><input type="text" id="location"/></td></tr>
+                <tr><td colspan="2"><div id="locationImg"></div></td></tr>
+                <tr><td colspan="2"><button type="submit" id="saveLabel"></button></td></tr>
+            </table>
+        </form>
+    </center>
+</body>
+</html>
